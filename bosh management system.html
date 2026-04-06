@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOSH Management System</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body, #app { height: 100%; }
+    body { font-family: 'Poppins', sans-serif; margin: 0; }
+    .font-display { font-family: 'Poppins', sans-serif; font-weight: 700; }
+    .sidebar-link { transition: all 0.2s ease; }
+    .sidebar-link:hover, .sidebar-link.active { background: rgba(255,255,255,0.15); }
+    .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(34,197,94,0.15); }
+    .fade-in { animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    input, select, textarea { font-family: 'Poppins', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #22c55e; border-radius: 3px; }
+    .progress-bar { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+    .badge-paid { background: #dcfce7; color: #166534; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-overdue { background: #fee2e2; color: #991b1b; }
+  </style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="flex h-full w-full" style="background:#f8fafc;"><!-- Sidebar -->
+   <aside class="w-64 flex-shrink-0 flex flex-col overflow-hidden" style="background:linear-gradient(180deg,#22c55e 0%,#16a34a 100%);color:#fff;">
+    <div class="p-6 border-b border-white/20">
+     <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl" style="background:rgba(255,255,255,0.2);">
+       🏢
+      </div>
+      <div>
+       <h1 class="font-display text-white text-lg font-bold">BOSH</h1>
+       <p class="text-green-100 text-xs mt-0.5">Management System</p>
+      </div>
+     </div>
+    </div>
+    <nav class="flex-1 p-3 space-y-1 overflow-y-auto"><button onclick="switchTab('budget')" data-tab="budget" class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="wallet" style="width:18px;height:18px;"></i> Monthly Budget </button> <button onclick="switchTab('expenditure')" data-tab="expenditure" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="trending-down" style="width:18px;height:18px;"></i> Monthly Expenditure </button> <button onclick="switchTab('shopping')" data-tab="shopping" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="shopping-bag" style="width:18px;height:18px;"></i> Household Shopping </button> <button onclick="switchTab('employees')" data-tab="employees" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="briefcase" style="width:18px;height:18px;"></i> Employee Records </button> <button onclick="switchTab('members')" data-tab="members" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="users" style="width:18px;height:18px;"></i> Members Record </button> <button onclick="switchTab('equipment')" data-tab="equipment" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="tool" style="width:18px;height:18px;"></i> Farm Equipment </button> <button onclick="switchTab('cars')" data-tab="cars" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="car" style="width:18px;height:18px;"></i> Cars </button> <button onclick="switchTab('expenses')" data-tab="expenses" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="receipt" style="width:18px;height:18px;"></i> Expense Tracker </button> <button onclick="switchTab('bills')" data-tab="bills" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="check-circle" style="width:18px;height:18px;"></i> Bill Pay Checklist </button> <button onclick="switchTab('savings')" data-tab="savings" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="piggy-bank" style="width:18px;height:18px;"></i> Savings Tracker </button> <button onclick="switchTab('inventory')" data-tab="inventory" class="sidebar-link w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/90 text-sm font-medium hover:text-white"> <i data-lucide="package" style="width:18px;height:18px;"></i> Inventory Lists </button>
+    </nav>
+   </aside><!-- Main Content -->
+   <main class="flex-1 flex flex-col overflow-hidden">
+    <header class="bg-white border-b border-gray-200 px-8 py-6 flex items-center justify-between">
+     <h2 id="page-title" class="font-display text-2xl text-gray-800">Monthly Budget</h2>
+    </header>
+    <div class="flex-1 overflow-auto p-8"><!-- Monthly Budget Tab -->
+     <div id="budget-content" class="tab-content fade-in">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Monthly Budget Overview</h3>
+       <div class="grid grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6 card-hover">
+         <p class="text-gray-600 text-sm mb-2">Total Budget</p>
+         <p id="total-budget" class="font-display text-3xl text-green-600">$0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 card-hover">
+         <p class="text-gray-600 text-sm mb-2">Total Spent</p>
+         <p id="total-spent" class="font-display text-3xl text-red-600">$0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 card-hover">
+         <p class="text-gray-600 text-sm mb-2">Remaining</p>
+         <p id="remaining-budget" class="font-display text-3xl text-blue-600">$0</p>
+        </div>
+       </div>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Set Monthly Budget</h4>
+        <div class="flex gap-4">
+         <input type="number" id="budget-input" placeholder="Enter budget amount" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <button onclick="setBudget()" class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Set Budget</button>
+        </div>
+       </div>
+       <div class="bg-white rounded-lg shadow p-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Spending Status</h4>
+        <div id="budget-status" class="text-lg text-gray-600">
+         No budget set yet
+        </div>
+       </div>
+      </div>
+     </div><!-- Monthly Expenditure Tab -->
+     <div id="expenditure-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Monthly Expenditure</h3>
+       <div class="bg-white rounded-lg shadow p-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Spending Breakdown</h4>
+        <canvas id="expenditureChart" style="max-height: 400px;"></canvas>
+       </div>
+      </div>
+     </div><!-- Household Shopping Tab -->
+     <div id="shopping-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Household Shopping</h3>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Add New Item</h4>
+        <div class="grid grid-cols-3 gap-4 mb-4">
+         <input type="text" id="shopping-item" placeholder="Item name" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="number" id="shopping-quantity" placeholder="Quantity" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="number" id="shopping-price" placeholder="Price" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+        </div><button onclick="addShoppingItem()" class="w-full px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Add Item</button>
+       </div>
+       <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full">
+         <thead class="bg-gray-100 border-b">
+          <tr>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Item</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Quantity</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Price</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Total</th>
+           <th class="px-6 py-3 text-center text-sm font-medium text-gray-700">Action</th>
+          </tr>
+         </thead>
+         <tbody id="shopping-list"></tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Employee Records Tab -->
+     <div id="employees-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Employee Records</h3>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Add New Employee</h4>
+        <div class="grid grid-cols-3 gap-4 mb-4">
+         <input type="text" id="employee-name" placeholder="Employee name" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="text" id="employee-number" placeholder="Employee number" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="text" id="employee-position" placeholder="Position" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+        </div><button onclick="addEmployee()" class="w-full px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Add Employee</button>
+       </div>
+       <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full">
+         <thead class="bg-gray-100 border-b">
+          <tr>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Name</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Employee Number</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Position</th>
+           <th class="px-6 py-3 text-center text-sm font-medium text-gray-700">Action</th>
+          </tr>
+         </thead>
+         <tbody id="employees-list"></tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Members Record Tab -->
+     <div id="members-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Members Record</h3>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Add New Member</h4>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+         <input type="text" id="member-name" placeholder="Member name" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="text" id="member-number" placeholder="Member number/ID" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+        </div><button onclick="addMember()" class="w-full px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Add Member</button>
+       </div>
+       <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full">
+         <thead class="bg-gray-100 border-b">
+          <tr>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Name</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Member Number</th>
+           <th class="px-6 py-3 text-center text-sm font-medium text-gray-700">Action</th>
+          </tr>
+         </thead>
+         <tbody id="members-list"></tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Farm Equipment Tab -->
+     <div id="equipment-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Farm Equipment</h3>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Add New Equipment</h4>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+         <input type="text" id="equipment-type" placeholder="Equipment type" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <select id="equipment-condition" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <option value="">Select condition</option> <option value="Excellent">Excellent</option> <option value="Good">Good</option> <option value="Fair">Fair</option> <option value="Poor">Poor</option> </select>
+        </div><button onclick="addEquipment()" class="w-full px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Add Equipment</button>
+       </div>
+       <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full">
+         <thead class="bg-gray-100 border-b">
+          <tr>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Equipment Type</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Condition</th>
+           <th class="px-6 py-3 text-center text-sm font-medium text-gray-700">Action</th>
+          </tr>
+         </thead>
+         <tbody id="equipment-list"></tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Cars Tab -->
+     <div id="cars-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Cars</h3>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Add New Car</h4>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+         <input type="text" id="car-type" placeholder="Car type (e.g., Toyota, Honda)" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="date" id="car-service" placeholder="Last service date" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+        </div><button onclick="addCar()" class="w-full px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Add Car</button>
+       </div>
+       <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full">
+         <thead class="bg-gray-100 border-b">
+          <tr>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Car Type</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Last Service Date</th>
+           <th class="px-6 py-3 text-center text-sm font-medium text-gray-700">Action</th>
+          </tr>
+         </thead>
+         <tbody id="cars-list"></tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Expense Tracker Tab -->
+     <div id="expenses-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Expense Tracker</h3>
+       <div class="grid grid-cols-2 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6 card-hover">
+         <p class="text-gray-600 text-sm mb-2">Total Expenses</p>
+         <p id="total-expenses" class="font-display text-3xl text-red-600">$0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 card-hover">
+         <p class="text-gray-600 text-sm mb-2">Monthly Average</p>
+         <p id="avg-expenses" class="font-display text-3xl text-orange-600">$0</p>
+        </div>
+       </div>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Add Expense</h4>
+        <div class="grid grid-cols-4 gap-4 mb-4"><select id="expense-category" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <option value="">Select Category</option> <option value="Food">Food</option> <option value="Transport">Transport</option> <option value="Utilities">Utilities</option> <option value="Medical">Medical</option> <option value="Entertainment">Entertainment</option> <option value="Other">Other</option> </select> <input type="number" id="expense-amount" placeholder="Amount" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="date" id="expense-date" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="text" id="expense-description" placeholder="Description" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+        </div><button onclick="addExpense()" class="w-full px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Add Expense</button>
+       </div>
+       <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full">
+         <thead class="bg-gray-100 border-b">
+          <tr>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Date</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Category</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Description</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
+           <th class="px-6 py-3 text-center text-sm font-medium text-gray-700">Action</th>
+          </tr>
+         </thead>
+         <tbody id="expenses-list"></tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Bill Pay Checklist Tab -->
+     <div id="bills-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Bill Pay Checklist</h3>
+       <div class="grid grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6 card-hover">
+         <p class="text-gray-600 text-sm mb-2">Total Bills</p>
+         <p id="total-bills" class="font-display text-3xl text-blue-600">$0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 card-hover">
+         <p class="text-gray-600 text-sm mb-2">Paid</p>
+         <p id="paid-bills" class="font-display text-3xl text-green-600">$0</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6 card-hover">
+         <p class="text-gray-600 text-sm mb-2">Pending</p>
+         <p id="pending-bills" class="font-display text-3xl text-red-600">$0</p>
+        </div>
+       </div>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Add Bill</h4>
+        <div class="grid grid-cols-4 gap-4 mb-4"><input type="text" id="bill-name" placeholder="Bill name" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="number" id="bill-amount" placeholder="Amount" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="date" id="bill-due" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <button onclick="addBill()" class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Add Bill</button>
+        </div>
+       </div>
+       <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full">
+         <thead class="bg-gray-100 border-b">
+          <tr>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Bill Name</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Due Date</th>
+           <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+           <th class="px-6 py-3 text-center text-sm font-medium text-gray-700">Action</th>
+          </tr>
+         </thead>
+         <tbody id="bills-list"></tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Savings Tracker Tab -->
+     <div id="savings-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Savings Tracker</h3>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Add Savings Goal</h4>
+        <div class="grid grid-cols-3 gap-4 mb-4"><input type="text" id="saving-goal" placeholder="Goal name" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="number" id="saving-target" placeholder="Target amount" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <button onclick="addSavingGoal()" class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Add Goal</button>
+        </div>
+       </div>
+       <div id="savings-goals" class="space-y-4"></div>
+      </div>
+     </div><!-- Inventory Lists Tab -->
+     <div id="inventory-content" class="tab-content fade-in hidden">
+      <div class="max-w-6xl mx-auto">
+       <h3 class="font-display text-xl text-gray-700 mb-6">Inventory Lists</h3>
+       <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h4 class="font-display text-lg text-gray-700 mb-4">Add Inventory Item</h4>
+        <div class="grid grid-cols-4 gap-4 mb-4"><select id="inventory-location" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <option value="">Select Location</option> <option value="Freezer">Freezer</option> <option value="Fridge">Fridge</option> <option value="Pantry">Pantry</option> </select> <input type="text" id="inventory-item" placeholder="Item name" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="number" id="inventory-quantity" placeholder="Quantity" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"> <input type="date" id="inventory-expiry" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+        </div><button onclick="addInventory()" class="w-full px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">Add Item</button>
+       </div>
+       <div id="inventory-sections" class="space-y-6"></div>
+      </div>
+     </div>
+    </div>
+   </main>
+  </div>
+  <script>
+    let allData = {};
+    let chartInstance = null;
+
+    // Initialize SDK
+    async function initializeApp() {
+      const dataHandler = {
+        onDataChanged(data) {
+          allData = {};
+          data.forEach(item => {
+            const category = item.category || item.item || item.employee_name || item.member_name || item.equipment_type || item.car_type || item.saving_goal || item.inventory_location || 'other';
+            if (!allData[category]) allData[category] = [];
+            allData[category].push(item);
+          });
+          renderAllLists();
+          updateBudgetDisplay();
+          updateExpenditureChart();
+          updateExpenseStats();
+          updateBillStats();
+          renderSavingsGoals();
+          renderInventory();
+        }
+      };
+
+      if (window.dataSdk) {
+        await window.dataSdk.init(dataHandler);
+      }
+    }
+
+    // Budget Functions
+    function setBudget() {
+      const budget = parseFloat(document.getElementById('budget-input').value);
+      if (!budget || budget <= 0) {
+        showMessage('Please enter a valid budget amount', 'error');
+        return;
+      }
+      localStorage.setItem('monthlyBudget', budget);
+      updateBudgetDisplay();
+      document.getElementById('budget-input').value = '';
+    }
+
+    function updateBudgetDisplay() {
+      const budget = parseFloat(localStorage.getItem('monthlyBudget')) || 0;
+      let totalSpent = 0;
+      
+      Object.values(allData).forEach(items => {
+        items.forEach(item => {
+          if (item.amount) totalSpent += item.amount;
+          if (item.price && item.quantity) totalSpent += item.price * item.quantity;
+          if (item.expense_amount) totalSpent += item.expense_amount;
+        });
+      });
+
+      const remaining = budget - totalSpent;
+      document.getElementById('total-budget').textContent = '$' + budget.toFixed(2);
+      document.getElementById('total-spent').textContent = '$' + totalSpent.toFixed(2);
+      document.getElementById('remaining-budget').textContent = '$' + remaining.toFixed(2);
+
+      if (budget === 0) {
+        document.getElementById('budget-status').textContent = 'No budget set yet';
+      } else if (totalSpent > budget) {
+        document.getElementById('budget-status').innerHTML = `<span class="text-red-600 font-semibold">⚠️ Over budget by $${(totalSpent - budget).toFixed(2)}</span>`;
+      } else if (totalSpent > budget * 0.8) {
+        document.getElementById('budget-status').innerHTML = `<span class="text-yellow-600 font-semibold">⚡ Caution: ${((totalSpent/budget)*100).toFixed(0)}% of budget spent</span>`;
+      } else {
+        document.getElementById('budget-status').innerHTML = `<span class="text-green-600 font-semibold">✓ Spending wisely - ${((totalSpent/budget)*100).toFixed(0)}% used</span>`;
+      }
+    }
+
+    // Expense Tracker Functions
+    async function addExpense() {
+      const category = document.getElementById('expense-category').value;
+      const amount = parseFloat(document.getElementById('expense-amount').value);
+      const date = document.getElementById('expense-date').value;
+      const description = document.getElementById('expense-description').value;
+
+      if (!category || !amount || !date) {
+        showMessage('Please fill all required fields', 'error');
+        return;
+      }
+
+      if (window.dataSdk) {
+        await window.dataSdk.create({
+          expense_category: category,
+          expense_amount: amount,
+          expense_date: date,
+          description: description,
+          category: 'expense'
+        });
+      }
+
+      document.getElementById('expense-category').value = '';
+      document.getElementById('expense-amount').value = '';
+      document.getElementById('expense-date').value = '';
+      document.getElementById('expense-description').value = '';
+    }
+
+    function updateExpenseStats() {
+      const expenses = allData['expense'] || [];
+      let totalExpenses = 0;
+      expenses.forEach(e => totalExpenses += e.expense_amount);
+      
+      const monthCount = new Set(expenses.map(e => e.expense_date.substring(0, 7))).size || 1;
+      const avgExpenses = totalExpenses / monthCount;
+
+      document.getElementById('total-expenses').textContent = '$' + totalExpenses.toFixed(2);
+      document.getElementById('avg-expenses').textContent = '$' + avgExpenses.toFixed(2);
+    }
+
+    function renderExpensesList() {
+      const tbody = document.getElementById('expenses-list');
+      tbody.innerHTML = '';
+      const items = allData['expense'] || [];
+      items.forEach(item => {
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-3 text-gray-700">${item.expense_date}</td>
+            <td class="px-6 py-3 text-gray-700">${item.expense_category}</td>
+            <td class="px-6 py-3 text-gray-700">${item.description || '-'}</td>
+            <td class="px-6 py-3 text-gray-700">$${item.expense_amount.toFixed(2)}</td>
+            <td class="px-6 py-3 text-center">
+              <button onclick="deleteItem('${item.__backendId}', 'expense')" class="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // Bill Pay Functions
+    async function addBill() {
+      const name = document.getElementById('bill-name').value;
+      const amount = parseFloat(document.getElementById('bill-amount').value);
+      const due = document.getElementById('bill-due').value;
+
+      if (!name || !amount || !due) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      if (window.dataSdk) {
+        await window.dataSdk.create({
+          bill_name: name,
+          bill_amount: amount,
+          due_date: due,
+          paid: false,
+          category: 'bill'
+        });
+      }
+
+      document.getElementById('bill-name').value = '';
+      document.getElementById('bill-amount').value = '';
+      document.getElementById('bill-due').value = '';
+    }
+
+    function updateBillStats() {
+      const bills = allData['bill'] || [];
+      let totalBills = 0;
+      let paidBills = 0;
+      let pendingBills = 0;
+
+      bills.forEach(b => {
+        totalBills += b.bill_amount;
+        if (b.paid) paidBills += b.bill_amount;
+        else pendingBills += b.bill_amount;
+      });
+
+      document.getElementById('total-bills').textContent = '$' + totalBills.toFixed(2);
+      document.getElementById('paid-bills').textContent = '$' + paidBills.toFixed(2);
+      document.getElementById('pending-bills').textContent = '$' + pendingBills.toFixed(2);
+    }
+
+    async function toggleBillStatus(id) {
+      const bills = allData['bill'] || [];
+      const bill = bills.find(b => b.__backendId === id);
+      if (bill && window.dataSdk) {
+        bill.paid = !bill.paid;
+        await window.dataSdk.update(bill);
+      }
+    }
+
+    function renderBillsList() {
+      const tbody = document.getElementById('bills-list');
+      tbody.innerHTML = '';
+      const items = allData['bill'] || [];
+      items.forEach(item => {
+        const status = item.paid ? 'Paid' : 'Pending';
+        const badgeClass = item.paid ? 'badge-paid' : 'badge-pending';
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-3 text-gray-700">${item.bill_name}</td>
+            <td class="px-6 py-3 text-gray-700">$${item.bill_amount.toFixed(2)}</td>
+            <td class="px-6 py-3 text-gray-700">${item.due_date}</td>
+            <td class="px-6 py-3">
+              <span class="badge ${badgeClass}">${status}</span>
+            </td>
+            <td class="px-6 py-3 text-center space-x-2">
+              <button onclick="toggleBillStatus('${item.__backendId}')" class="text-blue-600 hover:text-blue-800 font-medium text-sm">Toggle</button>
+              <button onclick="deleteItem('${item.__backendId}', 'bill')" class="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // Savings Tracker Functions
+    async function addSavingGoal() {
+      const goal = document.getElementById('saving-goal').value;
+      const target = parseFloat(document.getElementById('saving-target').value);
+
+      if (!goal || !target) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      if (window.dataSdk) {
+        await window.dataSdk.create({
+          saving_goal: goal,
+          saving_target: target,
+          saving_current: 0,
+          category: 'savings'
+        });
+      }
+
+      document.getElementById('saving-goal').value = '';
+      document.getElementById('saving-target').value = '';
+    }
+
+    async function updateSavingProgress(id, newAmount) {
+      const savings = allData['savings'] || [];
+      const saving = savings.find(s => s.__backendId === id);
+      if (saving && window.dataSdk) {
+        saving.saving_current = Math.min(newAmount, saving.saving_target);
+        await window.dataSdk.update(saving);
+      }
+    }
+
+    function renderSavingsGoals() {
+      const container = document.getElementById('savings-goals');
+      container.innerHTML = '';
+      const items = allData['savings'] || [];
+      
+      items.forEach(item => {
+        const progress = (item.saving_current / item.saving_target) * 100;
+        container.innerHTML += `
+          <div class="bg-white rounded-lg shadow p-6 card-hover">
+            <div class="flex justify-between items-start mb-4">
+              <h4 class="font-display text-lg text-gray-700">${item.saving_goal}</h4>
+              <button onclick="deleteItem('${item.__backendId}', 'savings')" class="text-red-600 hover:text-red-800 text-sm">Delete</button>
+            </div>
+            <div class="mb-4">
+              <div class="flex justify-between mb-2">
+                <span class="text-sm text-gray-600">$${item.saving_current.toFixed(2)}</span>
+                <span class="text-sm text-gray-600">$${item.saving_target.toFixed(2)}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="progress-bar h-2 rounded-full" style="width: ${progress}%"></div>
+              </div>
+              <p class="text-sm text-gray-600 mt-2">${progress.toFixed(0)}% Complete</p>
+            </div>
+            <div class="flex gap-2">
+              <input type="number" id="saving-add-${item.__backendId}" placeholder="Add amount" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+              <button onclick="addToSaving('${item.__backendId}')" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium text-sm hover:bg-green-700">Add</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function addToSaving(id) {
+      const input = document.getElementById(`saving-add-${id}`);
+      const amount = parseFloat(input.value);
+      if (amount > 0) {
+        const savings = allData['savings'] || [];
+        const saving = savings.find(s => s.__backendId === id);
+        if (saving) {
+          updateSavingProgress(id, saving.saving_current + amount);
+          input.value = '';
+        }
+      }
+    }
+
+    // Inventory Functions
+    async function addInventory() {
+      const location = document.getElementById('inventory-location').value;
+      const item = document.getElementById('inventory-item').value;
+      const quantity = parseFloat(document.getElementById('inventory-quantity').value);
+      const expiry = document.getElementById('inventory-expiry').value;
+
+      if (!location || !item || !quantity) {
+        showMessage('Please fill all required fields', 'error');
+        return;
+      }
+
+      if (window.dataSdk) {
+        await window.dataSdk.create({
+          inventory_location: location,
+          inventory_item: item,
+          inventory_quantity: quantity,
+          inventory_expiry: expiry || null,
+          category: 'inventory'
+        });
+      }
+
+      document.getElementById('inventory-location').value = '';
+      document.getElementById('inventory-item').value = '';
+      document.getElementById('inventory-quantity').value = '';
+      document.getElementById('inventory-expiry').value = '';
+    }
+
+    function renderInventory() {
+      const container = document.getElementById('inventory-sections');
+      container.innerHTML = '';
+      const locations = ['Freezer', 'Fridge', 'Pantry'];
+      
+      locations.forEach(location => {
+        const items = (allData['inventory'] || []).filter(i => i.inventory_location === location);
+        
+        let html = `
+          <div class="bg-white rounded-lg shadow p-6">
+            <h4 class="font-display text-lg text-gray-700 mb-4">${location}</h4>
+        `;
+        
+        if (items.length === 0) {
+          html += '<p class="text-gray-500">No items</p>';
+        } else {
+          html += '<div class="space-y-3">';
+          items.forEach(item => {
+            const expiryDate = item.inventory_expiry ? new Date(item.inventory_expiry) : null;
+            const isExpired = expiryDate && expiryDate < new Date();
+            const expiryText = expiryDate ? expiryDate.toDateString() : 'No expiry';
+            
+            html += `
+              <div class="flex justify-between items-center p-3 bg-gray-50 rounded border ${isExpired ? 'border-red-300' : 'border-gray-200'}">
+                <div>
+                  <p class="font-medium text-gray-700">${item.inventory_item}</p>
+                  <p class="text-sm text-gray-600">Qty: ${item.inventory_quantity} | Expiry: <span class="${isExpired ? 'text-red-600 font-semibold' : ''}">${expiryText}</span></p>
+                </div>
+                <button onclick="deleteItem('${item.__backendId}', 'inventory')" class="text-red-600 hover:text-red-800 text-sm">Delete</button>
+              </div>
+            `;
+          });
+          html += '</div>';
+        }
+        
+        html += '</div>';
+        container.innerHTML += html;
+      });
+    }
+
+    // Shopping Functions
+    async function addShoppingItem() {
+      const item = document.getElementById('shopping-item').value;
+      const quantity = parseFloat(document.getElementById('shopping-quantity').value);
+      const price = parseFloat(document.getElementById('shopping-price').value);
+
+      if (!item || !quantity || !price) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      if (window.dataSdk) {
+        await window.dataSdk.create({
+          item: item,
+          quantity: quantity,
+          price: price,
+          category: 'shopping'
+        });
+      }
+
+      document.getElementById('shopping-item').value = '';
+      document.getElementById('shopping-quantity').value = '';
+      document.getElementById('shopping-price').value = '';
+    }
+
+    // Employee Functions
+    async function addEmployee() {
+      const name = document.getElementById('employee-name').value;
+      const number = document.getElementById('employee-number').value;
+      const position = document.getElementById('employee-position').value;
+
+      if (!name || !number || !position) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      if (window.dataSdk) {
+        await window.dataSdk.create({
+          employee_name: name,
+          employee_number: number,
+          position: position,
+          category: 'employee'
+        });
+      }
+
+      document.getElementById('employee-name').value = '';
+      document.getElementById('employee-number').value = '';
+      document.getElementById('employee-position').value = '';
+    }
+
+    // Member Functions
+    async function addMember() {
+      const name = document.getElementById('member-name').value;
+      const number = document.getElementById('member-number').value;
+
+      if (!name || !number) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      if (window.dataSdk) {
+        await window.dataSdk.create({
+          member_name: name,
+          member_number: number,
+          category: 'member'
+        });
+      }
+
+      document.getElementById('member-name').value = '';
+      document.getElementById('member-number').value = '';
+    }
+
+    // Equipment Functions
+    async function addEquipment() {
+      const type = document.getElementById('equipment-type').value;
+      const condition = document.getElementById('equipment-condition').value;
+
+      if (!type || !condition) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      if (window.dataSdk) {
+        await window.dataSdk.create({
+          equipment_type: type,
+          condition: condition,
+          category: 'equipment'
+        });
+      }
+
+      document.getElementById('equipment-type').value = '';
+      document.getElementById('equipment-condition').value = '';
+    }
+
+    // Car Functions
+    async function addCar() {
+      const type = document.getElementById('car-type').value;
+      const service = document.getElementById('car-service').value;
+
+      if (!type || !service) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      if (window.dataSdk) {
+        await window.dataSdk.create({
+          car_type: type,
+          service_date: service,
+          category: 'car'
+        });
+      }
+
+      document.getElementById('car-type').value = '';
+      document.getElementById('car-service').value = '';
+    }
+
+    // Delete Functions
+    async function deleteItem(id, type) {
+      const items = allData[type] || [];
+      const item = items.find(i => i.__backendId === id);
+      if (item && window.dataSdk) {
+        await window.dataSdk.delete(item);
+      }
+    }
+
+    // Render Functions
+    function renderAllLists() {
+      renderShoppingList();
+      renderEmployeesList();
+      renderMembersList();
+      renderEquipmentList();
+      renderCarsList();
+      renderExpensesList();
+      renderBillsList();
+    }
+
+    function renderShoppingList() {
+      const tbody = document.getElementById('shopping-list');
+      tbody.innerHTML = '';
+      const items = allData['shopping'] || [];
+      items.forEach(item => {
+        const total = (item.quantity * item.price).toFixed(2);
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-3 text-gray-700">${item.item}</td>
+            <td class="px-6 py-3 text-gray-700">${item.quantity}</td>
+            <td class="px-6 py-3 text-gray-700">$${item.price.toFixed(2)}</td>
+            <td class="px-6 py-3 text-gray-700">$${total}</td>
+            <td class="px-6 py-3 text-center">
+              <button onclick="deleteItem('${item.__backendId}', 'shopping')" class="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderEmployeesList() {
+      const tbody = document.getElementById('employees-list');
+      tbody.innerHTML = '';
+      const items = allData['employee'] || [];
+      items.forEach(item => {
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-3 text-gray-700">${item.employee_name}</td>
+            <td class="px-6 py-3 text-gray-700">${item.employee_number}</td>
+            <td class="px-6 py-3 text-gray-700">${item.position}</td>
+            <td class="px-6 py-3 text-center">
+              <button onclick="deleteItem('${item.__backendId}', 'employee')" class="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderMembersList() {
+      const tbody = document.getElementById('members-list');
+      tbody.innerHTML = '';
+      const items = allData['member'] || [];
+      items.forEach(item => {
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-3 text-gray-700">${item.member_name}</td>
+            <td class="px-6 py-3 text-gray-700">${item.member_number}</td>
+            <td class="px-6 py-3 text-center">
+              <button onclick="deleteItem('${item.__backendId}', 'member')" class="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderEquipmentList() {
+      const tbody = document.getElementById('equipment-list');
+      tbody.innerHTML = '';
+      const items = allData['equipment'] || [];
+      items.forEach(item => {
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-3 text-gray-700">${item.equipment_type}</td>
+            <td class="px-6 py-3 text-gray-700"><span class="px-3 py-1 rounded-full text-sm ${item.condition === 'Excellent' ? 'bg-green-100 text-green-800' : item.condition === 'Good' ? 'bg-blue-100 text-blue-800' : item.condition === 'Fair' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">${item.condition}</span></td>
+            <td class="px-6 py-3 text-center">
+              <button onclick="deleteItem('${item.__backendId}', 'equipment')" class="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderCarsList() {
+      const tbody = document.getElementById('cars-list');
+      tbody.innerHTML = '';
+      const items = allData['car'] || [];
+      items.forEach(item => {
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-3 text-gray-700">${item.car_type}</td>
+            <td class="px-6 py-3 text-gray-700">${item.service_date}</td>
+            <td class="px-6 py-3 text-center">
+              <button onclick="deleteItem('${item.__backendId}', 'car')" class="text-red-600 hover:text-red-800 font-medium text-sm">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // Update Expenditure Chart
+    function updateExpenditureChart() {
+      const categoryTotals = {};
+      Object.entries(allData).forEach(([key, items]) => {
+        let total = 0;
+        items.forEach(item => {
+          if (item.amount) total += item.amount;
+          if (item.price && item.quantity) total += item.price * item.quantity;
+          if (item.expense_amount) total += item.expense_amount;
+        });
+        if (total > 0) categoryTotals[key] = total;
+      });
+
+      const ctx = document.getElementById('expenditureChart');
+      if (ctx) {
+        if (chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(categoryTotals),
+            datasets: [{
+              data: Object.values(categoryTotals),
+              backgroundColor: ['#22c55e', '#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
+              borderColor: '#fff',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' }
+            }
+          }
+        });
+      }
+    }
+
+    function showMessage(text, type) {
+      console.log(`${type}: ${text}`);
+    }
+
+    // Tab switching
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+
+      const contentId = tabName + '-content';
+      const content = document.getElementById(contentId);
+      if (content) content.classList.remove('hidden');
+
+      const link = document.querySelector(`[data-tab="${tabName}"]`);
+      if (link) link.classList.add('active');
+
+      const titles = {
+        budget: 'Monthly Budget',
+        expenditure: 'Monthly Expenditure',
+        shopping: 'Household Shopping',
+        employees: 'Employee Records',
+        members: 'Members Record',
+        equipment: 'Farm Equipment',
+        cars: 'Cars',
+        expenses: 'Expense Tracker',
+        bills: 'Bill Pay Checklist',
+        savings: 'Savings Tracker',
+        inventory: 'Inventory Lists'
+      };
+      document.getElementById('page-title').textContent = titles[tabName] || 'Dashboard';
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+      lucide.createIcons();
+      initializeApp();
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e55d9fc04fc8a5e',t:'MTc3NTAyODIzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
